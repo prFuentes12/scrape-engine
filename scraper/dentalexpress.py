@@ -86,9 +86,7 @@ def buscar_dentalexpress(termino):
                             descuento = f"-{round((1 - pf / po) * 100)}%"
                 except:
                     descuento = None
-
-                print(f"{idx}. {nombre_texto} | {precio} | {precio_original or '-'} | {descuento or '-'}")
-
+                    
                 resultados.append({
                     "nombre": nombre_texto,
                     "precio": precio,
