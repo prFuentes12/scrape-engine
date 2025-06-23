@@ -14,7 +14,7 @@ def buscar_proclinic(termino):
     resultados = []
 
     options = Options()
-    options.add_argument('--headless')  # Ejecuta en segundo plano
+    options.add_argument('--headless')
     options.add_argument('--disable-gpu')
     options.add_argument('--no-sandbox')
 
@@ -31,7 +31,6 @@ def buscar_proclinic(termino):
     except:
         print("ℹ️ No apareció el popup de confirmación.")
 
-    # 🧼 Parsear con BeautifulSoup sin guardar HTML
     soup = BeautifulSoup(driver.page_source, "html.parser")
     cards = soup.select("div.product-card")
 
@@ -42,21 +41,33 @@ def buscar_proclinic(termino):
 
     for idx, card in enumerate(cards):
         try:
-            nombre = card.select_one(".product-card__name a")
+            nombre_el = card.select_one(".product-card__name a")
             precio_final = card.select_one(".product-card__price--final")
             precio_original = card.select_one(".product-card__price--regular")
             etiqueta = card.select_one(".product-card__offer")
+            envase = card.select_one(".product-card__package")
 
-            nombre_texto = limpiar_texto(nombre.text) if nombre else ''
-            precio_texto = limpiar_texto(precio_final.text) if precio_final else ''
-            original_texto = limpiar_texto(precio_original.text) if precio_original else ''
-            etiqueta_texto = limpiar_texto(etiqueta.text) if etiqueta else None
+            # Nombre y campo adicional
+            nombre = limpiar_texto(nombre_el.text) if nombre_el else ''
+            envase_texto = limpiar_texto(envase.text.replace("\n", " ")) if envase else ''
+            envase_texto = " ".join(envase_texto.split())
+            nombre_completo = f"{nombre} - {envase_texto}".strip(" -") if envase_texto else nombre
+
+            # Enlace del producto
+            enlace = nombre_el.get("href") if nombre_el else ''
+            if enlace.startswith("/"):
+                enlace = "https://www.proclinic.es" + enlace
+
+            precio = limpiar_texto(precio_final.text) if precio_final else ''
+            original = limpiar_texto(precio_original.text) if precio_original else ''
+            descuento = limpiar_texto(etiqueta.text) if etiqueta else None
 
             resultados.append({
-                "nombre": nombre_texto,
-                "precio": precio_texto,
-                "precio_original": original_texto or None,
-                "descuento": etiqueta_texto or None
+                "nombre": nombre_completo,
+                "precio": precio,
+                "precio_original": original or None,
+                "descuento": descuento or None,
+                "url": enlace
             })
 
         except Exception as e:

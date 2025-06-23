@@ -1,0 +1,30 @@
+# Entorno virtual
+venv/
+.env/
+.venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Archivos temporales
+*.log
+*.tmp
+*.bak
+
+# Archivos de depuración de scraping
+*.html
+*.png
+*_debug.*
+*_error.*
+
+# Configuración del editor
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db

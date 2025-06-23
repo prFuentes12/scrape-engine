@@ -3,7 +3,6 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import time
 
-
 def buscar_100dental(termino):
     print("⏳ Cargando página de 100Dental...")
 
@@ -32,6 +31,7 @@ def buscar_100dental(termino):
         try:
             nombre_tag = producto.select_one('.wd-entities-title a')
             nombre = nombre_tag.get_text(strip=True) if nombre_tag else 'N/D'
+            enlace = nombre_tag['href'] if nombre_tag and nombre_tag.has_attr('href') else ''
 
             ins_tag = producto.select_one('ins .woocommerce-Price-amount.amount')
             del_tag = producto.select_one('del .woocommerce-Price-amount.amount')
@@ -63,7 +63,8 @@ def buscar_100dental(termino):
                 "nombre": nombre,
                 "precio": precio,
                 "precio_original": precio_original,
-                "descuento": descuento
+                "descuento": descuento,
+                "url": enlace
             })
 
         except Exception as e:

@@ -26,24 +26,26 @@ def buscar_dentaliberica(termino):
                 nombre_el = card.query_selector("div.product-card__name a")
                 if not nombre_el:
                     continue
-                nombre = limpiar_texto(nombre_el.inner_text())
 
-                # Reconstruir el precio final
+                nombre = limpiar_texto(nombre_el.inner_text())
+                enlace = nombre_el.get_attribute("href")
+                url_producto = f"https://dentaliberica.com{enlace}" if enlace and enlace.startswith("/") else enlace
+
+                # Precio final
                 precio_final_el = card.query_selector("span.product-card__price--final")
                 if precio_final_el:
                     entero = precio_final_el.query_selector("span.integer-part")
                     decimal = precio_final_el.query_selector("span.decimal-part")
                     moneda = precio_final_el.query_selector("span.currency-part")
-
                     precio = f"{entero.inner_text().strip() if entero else ''}{decimal.inner_text().strip() if decimal else ''}{moneda.inner_text().strip() if moneda else ''}"
                 else:
                     precio = ''
 
-                # Precio original (si lo hubiera)
+                # Precio original
                 precio_orig_el = card.query_selector("span.product-card__price--before")
                 precio_original = limpiar_texto(precio_orig_el.inner_text()) if precio_orig_el else ''
 
-                # Etiqueta (como descuento, liquidación, etc)
+                # Descuento o etiqueta
                 etiqueta_el = card.query_selector("span.badge")
                 descuento = limpiar_texto(etiqueta_el.inner_text()) if etiqueta_el else None
 
@@ -51,7 +53,8 @@ def buscar_dentaliberica(termino):
                     "nombre": nombre,
                     "precio": precio,
                     "precio_original": precio_original,
-                    "descuento": descuento
+                    "descuento": descuento,
+                    "url": url_producto
                 })
 
             except Exception as e:

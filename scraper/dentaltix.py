@@ -4,11 +4,11 @@ from selenium.webdriver.chrome.options import Options
 from scraper.utils import limpiar_texto
 import time
 
-
 def buscar_dentaltix(termino):
     print("⏳ Cargando página de Dentaltix...")
 
     url = f"https://www.dentaltix.com/es/search-results?keyword={termino.replace(' ', '+')}&_page=1"
+    resultados = []
 
     options = Options()
     options.add_argument("--headless=new")
@@ -19,7 +19,7 @@ def buscar_dentaltix(termino):
     driver.set_window_size(1920, 1080)
     driver.get(url)
 
-    # ⬇️ Scroll para forzar carga dinámica de productos
+    # ⬇️ Scroll para cargar más productos dinámicamente
     SCROLL_PAUSES = 6
     last_height = driver.execute_script("return document.body.scrollHeight")
     for _ in range(SCROLL_PAUSES):
@@ -32,7 +32,6 @@ def buscar_dentaltix(termino):
 
     soup = BeautifulSoup(driver.page_source, "html.parser")
     productos = soup.select("div.product-item.product-model-item")
-    resultados = []
 
     for idx, producto in enumerate(productos):
         try:
@@ -41,19 +40,23 @@ def buscar_dentaltix(termino):
             tachado = precio_tag.select_one("del") if precio_tag else None
 
             nombre = limpiar_texto(nombre_tag.text) if nombre_tag else "N/D"
+
+            # 🟦 Enlace del producto
+            enlace = nombre_tag.get("href") if nombre_tag else ""
+            if enlace and enlace.startswith("/"):
+                enlace = "https://www.dentaltix.com" + enlace
+
             precio_original = limpiar_texto(tachado.text) if tachado else None
 
-            # Extraer precio limpio
             precio_final = None
             if precio_tag:
                 txt = limpiar_texto(precio_tag.get_text(separator=" ").strip())
                 if precio_original:
                     precio_final = txt.replace(precio_original, "").strip()
                 else:
-                    precio_original = txt  # solo hay uno, no hay oferta
+                    precio_original = txt
                     precio_final = None
 
-            # Calcular descuento si aplica
             descuento = None
             try:
                 if precio_final and precio_original:
@@ -68,7 +71,8 @@ def buscar_dentaltix(termino):
                 "nombre": nombre,
                 "precio": precio_final or "-",
                 "precio_original": precio_original or "-",
-                "descuento": descuento or "-"
+                "descuento": descuento or "-",
+                "url": enlace
             })
 
         except Exception as e:

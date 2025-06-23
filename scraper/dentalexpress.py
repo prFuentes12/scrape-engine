@@ -6,7 +6,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
 
-
 def buscar_dentalexpress(termino):
     print("⏳ Cargando página de DentalExpress...")
 
@@ -57,41 +56,42 @@ def buscar_dentalexpress(termino):
         print(f"✅ {len(productos)} producto(s) encontrados:\n")
         for idx, producto in enumerate(productos, 1):
             try:
-                nombre = producto.select_one('.dfd-card-title')
+                nombre_el = producto.select_one('.dfd-card-title')
+                link_el = producto.find_parent('div', class_='dfd-card')  # contenedor general del producto
+                link = link_el.get("dfd-value-link") if link_el else None
+
                 precio_sale = producto.select_one('.dfd-card-price.dfd-card-price--sale')
                 precio_regular = producto.select_one('.dfd-card-price:not(.dfd-card-price--sale)')
 
-                nombre_texto = nombre.get_text(strip=True) if nombre else 'N/D'
-                precio_sale_texto = precio_sale.get_text(strip=True) if precio_sale else None
-                precio_regular_texto = precio_regular.get_text(strip=True) if precio_regular else None
+                nombre = nombre_el.get_text(strip=True) if nombre_el else 'N/D'
+                precio = precio_sale.get_text(strip=True) if precio_sale else None
+                precio_original = precio_regular.get_text(strip=True) if precio_regular else None
 
-                # Determinar precio actual y original correctamente
-                if precio_regular_texto and precio_sale_texto:
-                    precio = precio_sale_texto
-                    precio_original = precio_regular_texto
-                elif precio_regular_texto:
-                    precio = precio_regular_texto
+                if precio_regular and precio_sale:
+                    precio_final = precio
+                elif precio_regular:
+                    precio_final = precio_original
                     precio_original = None
                 else:
-                    precio = "N/D"
+                    precio_final = "N/D"
                     precio_original = None
 
-                # Calcular descuento si corresponde
                 descuento = None
                 try:
-                    if precio_original and precio:
+                    if precio_original and precio_final:
                         po = float(precio_original.replace(",", ".").replace("€", "").strip())
-                        pf = float(precio.replace(",", ".").replace("€", "").strip())
+                        pf = float(precio_final.replace(",", ".").replace("€", "").strip())
                         if po > pf:
                             descuento = f"-{round((1 - pf / po) * 100)}%"
                 except:
-                    descuento = None
-                    
+                    pass
+
                 resultados.append({
-                    "nombre": nombre_texto,
-                    "precio": precio,
+                    "nombre": nombre,
+                    "precio": precio_final,
                     "precio_original": precio_original,
-                    "descuento": descuento
+                    "descuento": descuento,
+                    "url": f"https://dentalexpress.es{link}" if link else None
                 })
 
             except Exception as e:

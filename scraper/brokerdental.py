@@ -38,7 +38,7 @@ def buscar_producto(nombre_busqueda):
             descuento_el = card.find_elements(By.CSS_SELECTOR, "p.product-card__save-percent")
 
             nombre = limpiar_texto(nombre_el[0].get_attribute("innerText")) if nombre_el else ''
-            
+            enlace = nombre_el[0].get_attribute("href") if nombre_el else ''
             precio = limpiar_texto(precio_el[0].get_attribute("innerText")) if precio_el else ''
             precio_original = limpiar_texto(original_el[0].get_attribute("innerText")) if original_el else ''
             descuento = limpiar_texto(descuento_el[0].get_attribute("innerText")) if descuento_el else None
@@ -47,7 +47,8 @@ def buscar_producto(nombre_busqueda):
                 "nombre": nombre,
                 "precio": precio,
                 "precio_original": precio_original,
-                "descuento": descuento
+                "descuento": descuento,
+                "url": enlace
             })
         except Exception as e:
             print(f"⚠️ Error en producto #{idx + 1}: {e}")
