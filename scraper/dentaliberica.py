@@ -28,9 +28,6 @@ def buscar_dentaliberica(termino):
                     continue
                 nombre = limpiar_texto(nombre_el.inner_text())
 
-                if termino.lower() not in nombre.lower():
-                    continue
-
                 # Reconstruir el precio final
                 precio_final_el = card.query_selector("span.product-card__price--final")
                 if precio_final_el:

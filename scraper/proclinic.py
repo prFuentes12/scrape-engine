@@ -52,9 +52,6 @@ def buscar_proclinic(termino):
             original_texto = limpiar_texto(precio_original.text) if precio_original else ''
             etiqueta_texto = limpiar_texto(etiqueta.text) if etiqueta else None
 
-            if termino.lower() not in nombre_texto.lower():
-                continue
-
             resultados.append({
                 "nombre": nombre_texto,
                 "precio": precio_texto,

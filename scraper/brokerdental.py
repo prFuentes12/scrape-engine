@@ -38,9 +38,7 @@ def buscar_producto(nombre_busqueda):
             descuento_el = card.find_elements(By.CSS_SELECTOR, "p.product-card__save-percent")
 
             nombre = limpiar_texto(nombre_el[0].get_attribute("innerText")) if nombre_el else ''
-            if nombre_busqueda.lower() not in nombre.lower():
-                continue  # Saltar si no coincide con la búsqueda
-
+            
             precio = limpiar_texto(precio_el[0].get_attribute("innerText")) if precio_el else ''
             precio_original = limpiar_texto(original_el[0].get_attribute("innerText")) if original_el else ''
             descuento = limpiar_texto(descuento_el[0].get_attribute("innerText")) if descuento_el else None
