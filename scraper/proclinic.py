@@ -39,6 +39,8 @@ def buscar_proclinic(termino):
         driver.quit()
         return []
 
+    terminos = termino.lower().split()
+
     for idx, card in enumerate(cards):
         try:
             nombre_el = card.select_one(".product-card__name a")
@@ -52,6 +54,10 @@ def buscar_proclinic(termino):
             envase_texto = limpiar_texto(envase.text.replace("\n", " ")) if envase else ''
             envase_texto = " ".join(envase_texto.split())
             nombre_completo = f"{nombre} - {envase_texto}".strip(" -") if envase_texto else nombre
+
+            # Filtro por coincidencia
+            if not all(t in nombre_completo.lower() for t in terminos):
+                continue
 
             # Enlace del producto
             enlace = nombre_el.get("href") if nombre_el else ''

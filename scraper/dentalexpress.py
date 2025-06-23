@@ -54,16 +54,23 @@ def buscar_dentalexpress(termino):
         print("⚠️ No se encontraron productos.")
     else:
         print(f"✅ {len(productos)} producto(s) encontrados:\n")
+        terminos = termino.lower().split()
+
         for idx, producto in enumerate(productos, 1):
             try:
                 nombre_el = producto.select_one('.dfd-card-title')
+                nombre = nombre_el.get_text(strip=True) if nombre_el else 'N/D'
+
+                # 🔍 Filtrar por coincidencia con todos los términos
+                if not all(t in nombre.lower() for t in terminos):
+                    continue
+
                 link_el = producto.find_parent('div', class_='dfd-card')  # contenedor general del producto
                 link = link_el.get("dfd-value-link") if link_el else None
 
                 precio_sale = producto.select_one('.dfd-card-price.dfd-card-price--sale')
                 precio_regular = producto.select_one('.dfd-card-price:not(.dfd-card-price--sale)')
 
-                nombre = nombre_el.get_text(strip=True) if nombre_el else 'N/D'
                 precio = precio_sale.get_text(strip=True) if precio_sale else None
                 precio_original = precio_regular.get_text(strip=True) if precio_regular else None
 

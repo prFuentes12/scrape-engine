@@ -27,11 +27,17 @@ def buscar_100dental(termino):
         driver.quit()
         return []
 
+    terminos = termino.lower().split()
+
     for idx, producto in enumerate(productos, 1):
         try:
             nombre_tag = producto.select_one('.wd-entities-title a')
             nombre = nombre_tag.get_text(strip=True) if nombre_tag else 'N/D'
             enlace = nombre_tag['href'] if nombre_tag and nombre_tag.has_attr('href') else ''
+
+            # 🔍 Filtrar por coincidencia con todos los términos
+            if not all(t in nombre.lower() for t in terminos):
+                continue
 
             ins_tag = producto.select_one('ins .woocommerce-Price-amount.amount')
             del_tag = producto.select_one('del .woocommerce-Price-amount.amount')

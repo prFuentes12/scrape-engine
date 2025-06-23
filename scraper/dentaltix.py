@@ -32,6 +32,7 @@ def buscar_dentaltix(termino):
 
     soup = BeautifulSoup(driver.page_source, "html.parser")
     productos = soup.select("div.product-item.product-model-item")
+    terminos = termino.lower().split()
 
     for idx, producto in enumerate(productos):
         try:
@@ -40,6 +41,10 @@ def buscar_dentaltix(termino):
             tachado = precio_tag.select_one("del") if precio_tag else None
 
             nombre = limpiar_texto(nombre_tag.text) if nombre_tag else "N/D"
+
+            # 🔍 Filtrado por coincidencia exacta de los términos
+            if not all(t in nombre.lower() for t in terminos):
+                continue
 
             # 🟦 Enlace del producto
             enlace = nombre_tag.get("href") if nombre_tag else ""

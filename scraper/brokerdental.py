@@ -30,6 +30,9 @@ def buscar_producto(nombre_busqueda):
     cards = driver.find_elements(By.CLASS_NAME, "products-catalog__item")
     resultados = []
 
+    # Preparamos las palabras clave a buscar
+    terminos = nombre_busqueda.lower().split()
+
     for idx, card in enumerate(cards):
         try:
             nombre_el = card.find_elements(By.CSS_SELECTOR, "h3.product-card__name a")
@@ -38,6 +41,11 @@ def buscar_producto(nombre_busqueda):
             descuento_el = card.find_elements(By.CSS_SELECTOR, "p.product-card__save-percent")
 
             nombre = limpiar_texto(nombre_el[0].get_attribute("innerText")) if nombre_el else ''
+
+            # 🔎 Filtrado: solo productos que contengan todas las palabras del término
+            if not all(t in nombre.lower() for t in terminos):
+                continue
+
             enlace = nombre_el[0].get_attribute("href") if nombre_el else ''
             precio = limpiar_texto(precio_el[0].get_attribute("innerText")) if precio_el else ''
             precio_original = limpiar_texto(original_el[0].get_attribute("innerText")) if original_el else ''

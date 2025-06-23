@@ -20,6 +20,7 @@ def buscar_dentaliberica(termino):
             return []
 
         cards = page.query_selector_all("div.product-card")
+        terminos = termino.lower().split()
 
         for idx, card in enumerate(cards):
             try:
@@ -28,6 +29,11 @@ def buscar_dentaliberica(termino):
                     continue
 
                 nombre = limpiar_texto(nombre_el.inner_text())
+
+                # ✅ Filtrar por coincidencia con todos los términos
+                if not all(t in nombre.lower() for t in terminos):
+                    continue
+
                 enlace = nombre_el.get_attribute("href")
                 url_producto = f"https://dentaliberica.com{enlace}" if enlace and enlace.startswith("/") else enlace
 
