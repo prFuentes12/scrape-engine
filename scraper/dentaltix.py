@@ -32,7 +32,10 @@ def buscar_dentaltix(termino):
 
     soup = BeautifulSoup(driver.page_source, "html.parser")
     productos = soup.select("div.product-item.product-model-item")
-    terminos = termino.lower().split()
+
+    # 🔎 Términos significativos (excluye palabras comunes)
+    stopwords = {"de", "para", "con", "sin", "en", "el", "la", "los", "las", "un", "una"}
+    terminos = [t for t in termino.lower().split() if t not in stopwords]
 
     for idx, producto in enumerate(productos):
         try:
@@ -42,7 +45,6 @@ def buscar_dentaltix(termino):
 
             nombre = limpiar_texto(nombre_tag.text) if nombre_tag else "N/D"
 
-            # 🔍 Filtrado por coincidencia exacta de los términos
             if not all(t in nombre.lower() for t in terminos):
                 continue
 

@@ -30,8 +30,9 @@ def buscar_producto(nombre_busqueda):
     cards = driver.find_elements(By.CLASS_NAME, "products-catalog__item")
     resultados = []
 
-    # Preparamos las palabras clave a buscar
-    terminos = nombre_busqueda.lower().split()
+    # Lista de palabras vacías comunes
+    stopwords = {"de", "para", "con", "sin", "en", "el", "la", "los", "las", "un", "una"}
+    terminos = [t for t in nombre_busqueda.lower().split() if t not in stopwords]
 
     for idx, card in enumerate(cards):
         try:
@@ -42,7 +43,7 @@ def buscar_producto(nombre_busqueda):
 
             nombre = limpiar_texto(nombre_el[0].get_attribute("innerText")) if nombre_el else ''
 
-            # 🔎 Filtrado: solo productos que contengan todas las palabras del término
+            # Filtrado solo si contiene todos los términos (ignorando palabras vacías)
             if not all(t in nombre.lower() for t in terminos):
                 continue
 

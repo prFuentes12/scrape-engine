@@ -39,7 +39,9 @@ def buscar_proclinic(termino):
         driver.quit()
         return []
 
-    terminos = termino.lower().split()
+    # 🧠 Preparamos términos útiles (sin stopwords)
+    stopwords = {"de", "para", "con", "sin", "en", "el", "la", "los", "las", "un", "una"}
+    terminos = [t for t in termino.lower().split() if t not in stopwords]
 
     for idx, card in enumerate(cards):
         try:
@@ -55,7 +57,7 @@ def buscar_proclinic(termino):
             envase_texto = " ".join(envase_texto.split())
             nombre_completo = f"{nombre} - {envase_texto}".strip(" -") if envase_texto else nombre
 
-            # Filtro por coincidencia
+            # 🔍 Filtro de coincidencia con los términos útiles
             if not all(t in nombre_completo.lower() for t in terminos):
                 continue
 

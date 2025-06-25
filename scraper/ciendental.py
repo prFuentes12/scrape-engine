@@ -27,7 +27,9 @@ def buscar_100dental(termino):
         driver.quit()
         return []
 
-    terminos = termino.lower().split()
+    # Palabras irrelevantes
+    stopwords = {"de", "para", "con", "sin", "en", "el", "la", "los", "las", "un", "una"}
+    terminos = [t for t in termino.lower().split() if t not in stopwords]
 
     for idx, producto in enumerate(productos, 1):
         try:
@@ -48,7 +50,6 @@ def buscar_100dental(termino):
             descuento = None
 
             if ins_tag and del_tag:
-                # ✅ Caso de descuento real
                 precio = ins_tag.get_text(strip=True)
                 precio_original = del_tag.get_text(strip=True)
                 try:
