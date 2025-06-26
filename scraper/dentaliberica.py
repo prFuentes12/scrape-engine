@@ -1,5 +1,12 @@
 from playwright.sync_api import sync_playwright
 from scraper.utils import limpiar_texto
+import unicodedata
+
+def normalizar(texto):
+    return ''.join(
+        c for c in unicodedata.normalize('NFKD', texto)
+        if not unicodedata.combining(c)
+    ).lower()
 
 def buscar_dentaliberica(termino):
     url = f"https://dentaliberica.com/es/products/search?q={termino}&subfamilies=true"
@@ -20,7 +27,9 @@ def buscar_dentaliberica(termino):
             return []
 
         cards = page.query_selector_all("div.product-card")
-        terminos = termino.lower().split()
+
+        stopwords = {"de", "para", "con", "sin", "en", "el", "la", "los", "las", "un", "una"}
+        terminos = [normalizar(t) for t in termino.lower().split() if t not in stopwords]
 
         for idx, card in enumerate(cards):
             try:
@@ -29,9 +38,9 @@ def buscar_dentaliberica(termino):
                     continue
 
                 nombre = limpiar_texto(nombre_el.inner_text())
+                nombre_norm = normalizar(nombre)
 
-                # ✅ Filtrar por coincidencia con todos los términos
-                if not all(t in nombre.lower() for t in terminos):
+                if not all(t in nombre_norm for t in terminos):
                     continue
 
                 enlace = nombre_el.get_attribute("href")

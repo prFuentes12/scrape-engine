@@ -5,6 +5,13 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
+import unicodedata
+
+def normalizar(texto):
+    return ''.join(
+        c for c in unicodedata.normalize('NFKD', texto)
+        if not unicodedata.combining(c)
+    ).lower()
 
 def buscar_dentalexpress(termino):
     print("⏳ Cargando página de DentalExpress...")
@@ -21,7 +28,6 @@ def buscar_dentalexpress(termino):
     driver.set_window_size(1920, 1080)
     driver.get(url)
 
-    # Cerrar overlay de cookies
     try:
         WebDriverWait(driver, 10).until(
             EC.invisibility_of_element_located((By.ID, "usercentrics-root"))
@@ -30,7 +36,6 @@ def buscar_dentalexpress(termino):
     except:
         print("⚠️ Overlay de cookies no desapareció.")
 
-    # Confirmar profesional
     try:
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.ID, "professional-input-custom"))
@@ -55,16 +60,16 @@ def buscar_dentalexpress(termino):
     else:
         print(f"✅ {len(productos)} producto(s) encontrados:\n")
 
-        # Palabras vacías para ignorar
         stopwords = {"de", "para", "con", "sin", "en", "el", "la", "los", "las", "un", "una"}
-        terminos = [t for t in termino.lower().split() if t not in stopwords]
+        terminos = [normalizar(t) for t in termino.lower().split() if t not in stopwords]
 
         for idx, producto in enumerate(productos, 1):
             try:
                 nombre_el = producto.select_one('.dfd-card-title')
                 nombre = nombre_el.get_text(strip=True) if nombre_el else 'N/D'
+                nombre_norm = normalizar(nombre)
 
-                if not all(t in nombre.lower() for t in terminos):
+                if not all(t in nombre_norm for t in terminos):
                     continue
 
                 link_el = producto.find_parent('div', class_='dfd-card')

@@ -6,6 +6,13 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from scraper.utils import limpiar_texto
 import time
+import unicodedata
+
+def normalizar(texto):
+    return ''.join(
+        c for c in unicodedata.normalize('NFKD', texto)
+        if not unicodedata.combining(c)
+    ).lower()
 
 def buscar_proclinic(termino):
     print("⏳ Cargando página de Proclinic...")
@@ -21,7 +28,6 @@ def buscar_proclinic(termino):
     driver = webdriver.Chrome(options=options)
     driver.get(url)
 
-    # 🔐 Confirmar acceso como profesional
     try:
         WebDriverWait(driver, 5).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, "button[data-testid='exclusive-professional-yes-button']"))
@@ -39,9 +45,8 @@ def buscar_proclinic(termino):
         driver.quit()
         return []
 
-    # 🧠 Preparamos términos útiles (sin stopwords)
     stopwords = {"de", "para", "con", "sin", "en", "el", "la", "los", "las", "un", "una"}
-    terminos = [t for t in termino.lower().split() if t not in stopwords]
+    terminos = [normalizar(t) for t in termino.lower().split() if t not in stopwords]
 
     for idx, card in enumerate(cards):
         try:
@@ -51,17 +56,16 @@ def buscar_proclinic(termino):
             etiqueta = card.select_one(".product-card__offer")
             envase = card.select_one(".product-card__package")
 
-            # Nombre y campo adicional
             nombre = limpiar_texto(nombre_el.text) if nombre_el else ''
             envase_texto = limpiar_texto(envase.text.replace("\n", " ")) if envase else ''
             envase_texto = " ".join(envase_texto.split())
             nombre_completo = f"{nombre} - {envase_texto}".strip(" -") if envase_texto else nombre
 
-            # 🔍 Filtro de coincidencia con los términos útiles
-            if not all(t in nombre_completo.lower() for t in terminos):
+            nombre_normalizado = normalizar(nombre_completo)
+
+            if not all(t in nombre_normalizado for t in terminos):
                 continue
 
-            # Enlace del producto
             enlace = nombre_el.get("href") if nombre_el else ''
             if enlace.startswith("/"):
                 enlace = "https://www.proclinic.es" + enlace

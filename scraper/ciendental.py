@@ -2,6 +2,13 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import time
+import unicodedata
+
+def normalizar(texto):
+    return ''.join(
+        c for c in unicodedata.normalize('NFKD', texto)
+        if not unicodedata.combining(c)
+    ).lower()
 
 def buscar_100dental(termino):
     print("⏳ Cargando página de 100Dental...")
@@ -27,18 +34,17 @@ def buscar_100dental(termino):
         driver.quit()
         return []
 
-    # Palabras irrelevantes
     stopwords = {"de", "para", "con", "sin", "en", "el", "la", "los", "las", "un", "una"}
-    terminos = [t for t in termino.lower().split() if t not in stopwords]
+    terminos = [normalizar(t) for t in termino.lower().split() if t not in stopwords]
 
     for idx, producto in enumerate(productos, 1):
         try:
             nombre_tag = producto.select_one('.wd-entities-title a')
             nombre = nombre_tag.get_text(strip=True) if nombre_tag else 'N/D'
+            nombre_norm = normalizar(nombre)
             enlace = nombre_tag['href'] if nombre_tag and nombre_tag.has_attr('href') else ''
 
-            # 🔍 Filtrar por coincidencia con todos los términos
-            if not all(t in nombre.lower() for t in terminos):
+            if not all(t in nombre_norm for t in terminos):
                 continue
 
             ins_tag = producto.select_one('ins .woocommerce-Price-amount.amount')
@@ -60,10 +66,8 @@ def buscar_100dental(termino):
                 except:
                     descuento = None
             elif len(span_tags) == 2:
-                # ✅ Caso de rango
                 precio_original = f"{span_tags[0].get_text(strip=True)}–{span_tags[1].get_text(strip=True)}"
             elif len(span_tags) == 1:
-                # ✅ Caso de precio único sin descuento
                 precio_original = span_tags[0].get_text(strip=True)
 
             resultados.append({

@@ -1,8 +1,15 @@
 from bs4 import BeautifulSoup
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+from selenium import webdriver  # type: ignore
+from selenium.webdriver.chrome.options import Options  # type: ignore
 from scraper.utils import limpiar_texto
 import time
+import unicodedata
+
+def normalizar(texto):
+    return ''.join(
+        c for c in unicodedata.normalize('NFKD', texto)
+        if not unicodedata.combining(c)
+    ).lower()
 
 def buscar_dentaltix(termino):
     print("⏳ Cargando página de Dentaltix...")
@@ -33,9 +40,8 @@ def buscar_dentaltix(termino):
     soup = BeautifulSoup(driver.page_source, "html.parser")
     productos = soup.select("div.product-item.product-model-item")
 
-    # 🔎 Términos significativos (excluye palabras comunes)
     stopwords = {"de", "para", "con", "sin", "en", "el", "la", "los", "las", "un", "una"}
-    terminos = [t for t in termino.lower().split() if t not in stopwords]
+    terminos = [normalizar(t) for t in termino.lower().split() if t not in stopwords]
 
     for idx, producto in enumerate(productos):
         try:
@@ -44,11 +50,11 @@ def buscar_dentaltix(termino):
             tachado = precio_tag.select_one("del") if precio_tag else None
 
             nombre = limpiar_texto(nombre_tag.text) if nombre_tag else "N/D"
+            nombre_normalizado = normalizar(nombre)
 
-            if not all(t in nombre.lower() for t in terminos):
+            if not all(t in nombre_normalizado for t in terminos):
                 continue
 
-            # 🟦 Enlace del producto
             enlace = nombre_tag.get("href") if nombre_tag else ""
             if enlace and enlace.startswith("/"):
                 enlace = "https://www.dentaltix.com" + enlace

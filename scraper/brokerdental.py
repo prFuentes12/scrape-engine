@@ -4,6 +4,13 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from .utils import limpiar_texto
+import unicodedata
+
+def normalizar(texto):
+    return ''.join(
+        c for c in unicodedata.normalize('NFKD', texto)
+        if not unicodedata.combining(c)
+    ).lower()
 
 def buscar_producto(nombre_busqueda):
     url = f"https://www.brokerdental.es/products/search?q={nombre_busqueda}&subfamilies=false"
@@ -30,9 +37,8 @@ def buscar_producto(nombre_busqueda):
     cards = driver.find_elements(By.CLASS_NAME, "products-catalog__item")
     resultados = []
 
-    # Lista de palabras vacías comunes
     stopwords = {"de", "para", "con", "sin", "en", "el", "la", "los", "las", "un", "una"}
-    terminos = [t for t in nombre_busqueda.lower().split() if t not in stopwords]
+    terminos = [normalizar(t) for t in nombre_busqueda.lower().split() if t not in stopwords]
 
     for idx, card in enumerate(cards):
         try:
@@ -42,9 +48,9 @@ def buscar_producto(nombre_busqueda):
             descuento_el = card.find_elements(By.CSS_SELECTOR, "p.product-card__save-percent")
 
             nombre = limpiar_texto(nombre_el[0].get_attribute("innerText")) if nombre_el else ''
+            nombre_norm = normalizar(nombre)
 
-            # Filtrado solo si contiene todos los términos (ignorando palabras vacías)
-            if not all(t in nombre.lower() for t in terminos):
+            if not all(t in nombre_norm for t in terminos):
                 continue
 
             enlace = nombre_el[0].get_attribute("href") if nombre_el else ''
