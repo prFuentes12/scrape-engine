@@ -1,14 +1,14 @@
-from scraper.brokerdental import buscar_producto
+from scraper.proclinic import buscar_proclinic
 
-termino = "guantes"
+def imprimir_resultados(termino):
+    resultados = buscar_proclinic(termino)
+    print(f"\n🔍 Resultados para: '{termino}'\n")
+    for idx, prod in enumerate(resultados, 1):
+        print(f"{idx}. {prod['nombre']}")
+        print(f"   Precio: {prod['precio']}")
+        print(f"   Original: {prod['precio_original']}")
+        print(f"   Descuento: {prod['descuento']}")
+        print(f"   URL: {prod['url']}\n")
 
-print(f"🟦 Probando búsqueda en Broker Dental con término: '{termino}'")
-
-try:
-    resultados = buscar_producto(termino)
-    print(f"🔍 {len(resultados)} resultados encontrados.\n")
-
-    for idx, r in enumerate(resultados):
-        print(f"{idx+1}. {r['nombre']} → {r['url']}")
-except Exception as e:
-    print(f"❌ Error: {e}")
+if __name__ == "__main__":
+    imprimir_resultados("guantes de látex")
