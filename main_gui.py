@@ -7,6 +7,7 @@ from scraper.proclinic import buscar_proclinic
 from scraper.dentaltix import buscar_dentaltix
 from scraper.dentalexpress import buscar_dentalexpress
 from scraper.ciendental import buscar_100dental
+from scraper.cliniclic import buscar_cliniclic
 import webbrowser
 
 PROVEEDORES = {
@@ -15,7 +16,9 @@ PROVEEDORES = {
     "Proclinic": buscar_proclinic,
     "Dentaltix": buscar_dentaltix,
     "Dental Express": buscar_dentalexpress,
-    "100Dental": buscar_100dental
+    "100Dental": buscar_100dental,
+    "Cliniclic": buscar_cliniclic 
+
 }
 
 def convertir_precio(precio_str):
