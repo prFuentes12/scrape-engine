@@ -105,7 +105,7 @@ def buscar_dentalexpress(termino):
                     "precio": precio_final,
                     "precio_original": precio_original,
                     "descuento": descuento,
-                    "url": f"https://dentalexpress.es{link}" if link else None
+                    "url": f"{link}" if link else None
                 })
 
             except Exception as e:
